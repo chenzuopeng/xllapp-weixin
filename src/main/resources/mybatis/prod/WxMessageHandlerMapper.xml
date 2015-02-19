@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.xllapp.portal.weixin.dao.WxMessageHandlerDao">
+
+   <resultMap id="wxMessageResultMap" type="org.xllapp.portal.weixin.entity.WxMessage">
+          <result property="id" column="id"/>
+          <result property="messageType" column="message_type"/>
+          <result property="messageName" column="message_name"/>
+          <result property="messageContent" column="message_content"/>
+          <result property="messageMedia" column="message_media"/>
+          <result property="messageTitle" column="message_title"/>
+          <result property="messageDescription" column="message_description"/>
+          <result property="messageHqMedia" column="message_hq_media"/>
+          <result property="messageThumb" column="message_thumb"/>
+          <result property="createTime" column="create_time"/>
+   </resultMap>
+   
+   <resultMap id="wxKeywordResultMap" type="org.xllapp.portal.weixin.entity.WxKeyword">
+          <result property="id" column="id"/>
+          <result property="keyword" column="keyword"/>
+          <result property="messageId" column="message_id"/>
+          <result property="description" column="description"/>
+          <result property="createTime" column="create_time"/>
+   </resultMap>
+   
+   <resultMap id="wxMessageArticleResultMap" type="org.xllapp.portal.weixin.entity.WxMessageArticle">
+          <result property="id" column="id"/>
+          <result property="messageId" column="message_id"/>
+          <result property="articleTitle" column="article_title"/>
+          <result property="articleDescription" column="article_description"/>
+          <result property="articlePic" column="article_pic"/>
+          <result property="articleUrl" column="article_url"/>
+          <result property="orderNo" column="order_no"/>
+          <result property="createTime" column="create_time"/>
+   </resultMap>
+   
+    <sql id="wxMessageColumns">
+	    <![CDATA[
+		id,message_type,message_name,message_content,message_media,message_title,message_description,message_hq_media,message_thumb,create_time
+	    ]]>
+	</sql>
+   
+   	<select id="getMessageById" resultMap="wxMessageResultMap">		
+		select <include refid="wxMessageColumns" />
+	    <![CDATA[
+		    from wx_message where id = #{param_1} 
+	    ]]>
+	</select>
+	
+	<select id="getKeywords" resultMap="wxKeywordResultMap">
+		select keyword,message_id from wx_keyword
+	</select>
+	
+    <select id="getMessageArticles" resultMap="wxMessageArticleResultMap">		
+		select article_title,article_description,article_pic,article_url
+	    <![CDATA[
+		    from wx_message_article where message_id = #{param_1} 
+	    ]]>
+	    order by order_no desc limit 0,10
+	</select>
+	
+	<select id="getMessageOfSubscribeEvent"  resultMap="wxMessageResultMap">		
+		select <include refid="wxMessageColumns" /> from wx_message where id = (select message_id from wx_event_message where event='subscribe')
+	</select>
+	
+    <select id="getMessageOfDefault"  resultMap="wxMessageResultMap">		
+		select <include refid="wxMessageColumns" /> from wx_message where id = (select message_id from wx_event_message where event='default')
+	</select>
+	
+	<select id="getMessageOfMenuEvent"  resultMap="wxMessageResultMap">		
+		select <include refid="wxMessageColumns" /> from wx_message where id = (select message_id from wx_menu where menu_key=#{param_1})
+	</select>
+	
+</mapper> 

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.xllapp.portal.weixin.dao.WxLogDao">
+
+   <resultMap id="wxLogResultMap" type="org.xllapp.portal.weixin.entity.WxLog">
+          <result property="id" column="id"/>
+          <result property="msgId" column="msg_id"/>
+          <result property="toUserName" column="to_user_name"/>
+          <result property="fromUserName" column="from_user_name"/>
+          <result property="msgType" column="msg_type"/>
+          <result property="inMessage" column="in_message"/>
+          <result property="outMessage" column="out_message"/>
+          <result property="result" column="result"/>
+          <result property="error" column="error"/>
+          <result property="createTime" column="create_time"/>
+   </resultMap>
+	
+	<select id="query"  parameterType="map"  resultMap="wxLogResultMap">
+		select id,from_user_name,to_user_name,msg_type,result,create_time
+        from wx_log
+		<where>
+			      <if test="@Ognl@isNotEmpty(fromUserName)">
+				  and from_user_name like concat('%',#{fromUserName},'%')
+			      </if>
+			      <if test="@Ognl@isNotEmpty(createTimeBegin) and @Ognl@isNotEmpty(createTimeEnd)">
+				  and create_time between str_to_date(#{createTimeBegin},'%Y-%m-%d %H:%i:%s') and str_to_date(#{createTimeEnd},'%Y-%m-%d %H:%i:%s')
+			      </if>
+			      <if test="@Ognl@isNotEmpty(result)">
+				  and result = #{result}
+			      </if>
+		</where>
+		order by id desc
+	</select>
+
+	<select id="get" parameterType="long" resultMap="wxLogResultMap">		
+		select id,to_user_name,from_user_name,msg_type,in_message,out_message,result,error,create_time
+	    <![CDATA[
+		    from wx_log where id = #{id} 
+	    ]]>
+	</select>
+	
+	<insert id="insert" parameterType="org.xllapp.portal.weixin.entity.WxLog" useGeneratedKeys="true" keyProperty="id">        
+    <![CDATA[
+        insert into  wx_log (
+            msg_id ,
+        	to_user_name ,
+        	from_user_name ,
+        	msg_type ,
+        	in_message ,
+        	out_message ,
+        	result,
+        	error ,
+        	create_time 
+        ) values (
+            #{msgId},
+        	#{toUserName},
+        	#{fromUserName},
+        	#{msgType},
+        	#{inMessage},
+        	#{outMessage},
+        	#{result},
+        	#{error},
+        	now()
+        )
+    ]]>  
+	</insert>
+
+	<update id="update" parameterType="org.xllapp.portal.weixin.entity.WxLog">
+	<![CDATA[
+		update wx_log set
+		   msg_id = #{msgId}, 
+	       to_user_name = #{toUserName},
+	       from_user_name = #{fromUserName},
+	       msg_type = #{msgType},
+	       in_message = #{inMessage},
+	       out_message = #{outMessage},
+	       result = #{result},
+	       error = #{error},
+	       create_time = #{createTime}
+		where  id = #{id}
+	 ]]>
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		delete from wx_log where id = #{id}
+	</delete>
+	
+	<delete id="deletes">
+		delete from wx_log where id in 
+        <foreach item="item" index="index" collection="array" open="(" separator="," close=")">#{item}</foreach>
+    </delete>
+	
+</mapper>

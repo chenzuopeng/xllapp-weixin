@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.xllapp.portal.weixin.dao.WxSubscribeAccountDao">
+
+   <resultMap id="wxSubscribeAccountResultMap" type="org.xllapp.portal.weixin.entity.WxSubscribeAccount">
+          <result property="id" column="id"/>
+          <result property="openId" column="open_id"/>
+          <result property="nickname" column="nickname"/>
+          <result property="sex" column="sex"/>
+          <result property="city" column="city"/>
+          <result property="province" column="province"/>
+          <result property="country" column="country"/>
+          <result property="language" column="language"/>
+          <result property="headImgUrl" column="head_img_url"/>
+          <result property="subscribe" column="subscribe"/>
+          <result property="subscribeTime" column="subscribe_time"/>
+          <result property="unsubscribeTime" column="unsubscribe_time"/>
+          <result property="unionId" column="union_id"/>
+          <result property="createTime" column="create_time"/>
+   </resultMap>
+   
+   	<sql id="wxSubscribeAccountColumns">
+	    <![CDATA[
+		id,open_id,nickname,sex,city,province,country,language,head_img_url,subscribe_time,unsubscribe_time,union_id,subscribe,create_time
+	    ]]>
+	</sql>
+	
+	<select id="query"  parameterType="map"  resultMap="wxSubscribeAccountResultMap">
+		select <include refid="wxSubscribeAccountColumns" />
+        from wx_subscribe_account
+		<where>
+			      <if test="@Ognl@isNotEmpty(openId)">
+				  and open_id = #{openId}
+			      </if>
+			      <if test="@Ognl@isNotEmpty(nickname)">
+				  and nickname like concat('%',#{nickname},'%')
+			      </if>
+			      <if test="@Ognl@isNotEmpty(city)">
+				  and city = #{city}
+			      </if>
+			      <if test="@Ognl@isNotEmpty(province)">
+				  and province = #{province}
+			      </if>
+			      <if test="@Ognl@isNotEmpty(country)">
+				  and country = #{country}
+			      </if>
+			      <if test="@Ognl@isNotEmpty(subscribe)">
+				  and subscribe = #{subscribe}
+			      </if>
+			      <if test="@Ognl@isNotEmpty(subscribeTimeBegin) and @Ognl@isNotEmpty(subscribeTimeEnd)">
+				  and subscribe_time between str_to_date(#{subscribeTimeBegin},'%Y-%m-%d %H:%i:%s') and str_to_date(#{subscribeTimeEnd},'%Y-%m-%d %H:%i:%s')
+			      </if>
+			      <if test="@Ognl@isNotEmpty(unsubscribeTimeBegin) and @Ognl@isNotEmpty(unsubscribeTimeEnd)">
+				  and unsubscribe_time between str_to_date(#{unsubscribeTimeBegin},'%Y-%m-%d %H:%i:%s') and str_to_date(#{unsubscribeTimeEnd},'%Y-%m-%d %H:%i:%s')
+			      </if>
+		</where>
+		order by id desc
+	</select>
+
+	<select id="get" parameterType="long" resultMap="wxSubscribeAccountResultMap">		
+		select <include refid="wxSubscribeAccountColumns" />
+	    <![CDATA[
+		    from wx_subscribe_account where id = #{id} 
+	    ]]>
+	</select>
+	
+	<select id="findByOpenId" resultMap="wxSubscribeAccountResultMap">		
+		select <include refid="wxSubscribeAccountColumns" />
+	    <![CDATA[
+		    from wx_subscribe_account where open_id = #{param_1} 
+	    ]]>
+	</select>
+	
+	<insert id="insert" parameterType="org.xllapp.portal.weixin.entity.WxSubscribeAccount" useGeneratedKeys="true" keyProperty="id">        
+    <![CDATA[
+        insert into  wx_subscribe_account (
+        	open_id ,
+        	nickname ,
+        	sex ,
+        	city ,
+        	province ,
+        	country ,
+        	language ,
+        	head_img_url ,
+        	subscribe_time ,
+        	unsubscribe_time ,
+        	union_id ,
+        	subscribe ,
+        	create_time 
+        ) values (
+        	#{openId},
+        	#{nickname},
+        	#{sex},
+        	#{city},
+        	#{province},
+        	#{country},
+        	#{language},
+        	#{headImgUrl},
+        	#{subscribeTime},
+        	#{unsubscribeTime},
+        	#{unionId},
+        	#{subscribe},
+        	now()
+        )
+    ]]>  
+	</insert>
+
+	<update id="update" parameterType="org.xllapp.portal.weixin.entity.WxSubscribeAccount">
+	<![CDATA[
+		update wx_subscribe_account set 
+	       open_id = #{openId},
+	       nickname = #{nickname},
+	       sex = #{sex},
+	       city = #{city},
+	       province = #{province},
+	       country = #{country},
+	       language = #{language},
+	       head_img_url = #{headImgUrl},
+	       subscribe_time = #{subscribeTime},
+	       unsubscribe_time = #{unsubscribeTime},
+	       union_id = #{unionId},
+	       subscribe = #{subscribe},
+	       create_time = #{createTime}
+		where  id = #{id}
+	 ]]>
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		delete from wx_subscribe_account where id = #{id}
+	</delete>
+	
+	<delete id="deletes">
+		delete from wx_subscribe_account where id in 
+        <foreach item="item" index="index" collection="array" open="(" separator="," close=")">#{item}</foreach>
+    </delete>
+	
+</mapper> 

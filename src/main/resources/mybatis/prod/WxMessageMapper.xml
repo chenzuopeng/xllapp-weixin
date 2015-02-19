@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.xllapp.portal.weixin.dao.WxMessageDao">
+
+   <resultMap id="wxMessageResultMap" type="org.xllapp.portal.weixin.entity.WxMessage">
+          <result property="id" column="id"/>
+          <result property="messageType" column="message_type"/>
+          <result property="messageName" column="message_name"/>
+          <result property="messageContent" column="message_content"/>
+          <result property="messageMedia" column="message_media"/>
+          <result property="messageTitle" column="message_title"/>
+          <result property="messageDescription" column="message_description"/>
+          <result property="messageHqMedia" column="message_hq_media"/>
+          <result property="messageThumb" column="message_thumb"/>
+          <result property="createTime" column="create_time"/>
+   </resultMap>
+   
+   	<sql id="wxMessageColumns">
+	    <![CDATA[
+		id,message_type,message_name,message_content,message_media,message_title,message_description,message_hq_media,message_thumb,create_time
+	    ]]>
+	</sql>
+	
+	<select id="query"  parameterType="map"  resultMap="wxMessageResultMap">
+		select <include refid="wxMessageColumns" />
+        from wx_message
+		<where>
+			      <if test="@Ognl@isNotEmpty(messageType)">
+				  and message_type = #{messageType}
+			      </if>
+			      <if test="@Ognl@isNotEmpty(messageName)">
+				  and message_name like concat('%',#{messageName},'%')
+			      </if>
+			      <if test="@Ognl@isNotEmpty(createTimeBegin) and @Ognl@isNotEmpty(createTimeEnd)">
+				  and create_time between str_to_date(#{createTimeBegin},'%Y-%m-%d %H:%i:%s') and str_to_date(#{createTimeEnd},'%Y-%m-%d %H:%i:%s')
+			      </if>
+		</where>
+		order by id desc
+	</select>
+	
+	<select id="getMessageNames"  resultMap="wxMessageResultMap">
+		select id,message_name from wx_message order by id desc
+	</select>
+
+	<select id="get" parameterType="long" resultMap="wxMessageResultMap">		
+		select <include refid="wxMessageColumns" />
+	    <![CDATA[
+		    from wx_message where id = #{id} 
+	    ]]>
+	</select>
+	
+	<insert id="insert" parameterType="org.xllapp.portal.weixin.entity.WxMessage" useGeneratedKeys="true" keyProperty="id">        
+    <![CDATA[
+        insert into  wx_message (
+        	message_type ,
+        	message_name ,
+        	message_content ,
+        	message_media ,
+        	message_title ,
+        	message_description ,
+        	message_hq_media ,
+        	message_thumb ,
+        	create_time 
+        ) values (
+        	#{messageType},
+        	#{messageName},
+        	#{messageContent},
+        	#{messageMedia},
+        	#{messageTitle},
+        	#{messageDescription},
+        	#{messageHqMedia},
+        	#{messageThumb},
+        	now()
+        )
+    ]]>  
+	</insert>
+
+	<update id="update" parameterType="org.xllapp.portal.weixin.entity.WxMessage">
+	<![CDATA[
+		update wx_message set 
+	       message_type = #{messageType},
+	       message_name = #{messageName},
+	       message_content = #{messageContent},
+	       message_media = #{messageMedia},
+	       message_title = #{messageTitle},
+	       message_description = #{messageDescription},
+	       message_hq_media = #{messageHqMedia},
+	       message_thumb = #{messageThumb},
+	       create_time = #{createTime}
+		where  id = #{id}
+	 ]]>
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		delete from wx_message where id = #{id}
+	</delete>
+	
+	<delete id="deletes">
+		delete from wx_message where id in 
+        <foreach item="item" index="index" collection="array" open="(" separator="," close=")">#{item}</foreach>
+    </delete>
+	
+</mapper>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.xllapp.portal.weixin.dao.WxMenuDao">
+
+   <resultMap id="wxMenuResultMap" type="org.xllapp.portal.weixin.entity.WxMenu">
+          <result property="id" column="id"/>
+          <result property="pid" column="pid"/>
+          <result property="menuLevel" column="menu_level"/>
+          <result property="isBranch" column="is_branch"/>
+          <result property="menuType" column="menu_type"/>
+          <result property="menuName" column="menu_name"/>
+          <result property="menuKey" column="menu_key"/>
+          <result property="messageId" column="message_id"/>
+          <result property="menuUrl" column="menu_url"/>
+          <result property="orderNo" column="order_no"/>
+          <result property="createTime" column="create_time"/>
+   </resultMap>
+   
+   	<sql id="wxMenuColumns">
+	    <![CDATA[
+		id,pid,menu_level,is_branch,menu_type,menu_name,menu_key,message_id,menu_url,order_no,create_time
+	    ]]>
+	</sql>
+	
+	<select id="query"  parameterType="map"  resultMap="wxMenuResultMap">
+		select <include refid="wxMenuColumns" />
+        from wx_menu
+		<where>
+			      <if test="@Ognl@isNotEmpty(pid)">
+				  and pid = #{pid}
+			      </if>
+			      <if test="@Ognl@isNotEmpty(isBranch)">
+				  and is_branch = #{isBranch}
+			      </if>
+			      <if test="@Ognl@isNotEmpty(menuName)">
+				  and menu_name like concat('%',#{menuName},'%')
+			      </if>
+		</where>
+		order by menu_level asc,order_no desc
+	</select>
+	
+	<select id="getBranchMenus" resultMap="wxMenuResultMap">
+		select id,menu_name from wx_menu where is_branch = '0'
+	</select>
+	
+	<select id="getOneMenus" resultMap="wxMenuResultMap">
+		select <include refid="wxMenuColumns" />  
+		from wx_menu where menu_level = '1' order by order_no desc
+	</select>
+	
+	<select id="getTwoMenus" resultMap="wxMenuResultMap">
+		select <include refid="wxMenuColumns" /> 
+		from wx_menu where menu_level = '2' and is_branch = '1' and pid=#{param_1} order by order_no desc
+	</select>
+
+	<select id="get" parameterType="long" resultMap="wxMenuResultMap">		
+		select <include refid="wxMenuColumns" />
+	    <![CDATA[
+		    from wx_menu where id = #{id} 
+	    ]]>
+	</select>
+	
+	<insert id="insert" parameterType="org.xllapp.portal.weixin.entity.WxMenu" useGeneratedKeys="true" keyProperty="id">        
+    <![CDATA[
+        insert into  wx_menu (
+        	pid ,
+        	menu_level,
+        	is_branch ,
+        	menu_type ,
+        	menu_name ,
+        	menu_key ,
+        	message_id ,
+        	menu_url ,
+        	order_no ,
+        	create_time 
+        ) values (
+        	#{pid},
+        	#{menuLevel},
+        	#{isBranch},
+        	#{menuType},
+        	#{menuName},
+        	#{menuKey},
+        	#{messageId},
+        	#{menuUrl},
+        	#{orderNo},
+        	now()
+        )
+    ]]>  
+	</insert>
+
+	<update id="update" parameterType="org.xllapp.portal.weixin.entity.WxMenu">
+	<![CDATA[
+		update wx_menu set 
+	       pid = #{pid},
+	       menu_level = #{menuLevel},
+	       is_branch = #{isBranch},
+	       menu_type = #{menuType},
+	       menu_name = #{menuName},
+	       menu_key = #{menuKey},
+	       message_id = #{messageId},
+	       menu_url = #{menuUrl},
+	       order_no = #{orderNo},
+	       create_time = #{createTime}
+		where  id = #{id}
+	 ]]>
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		delete from wx_menu where id = #{id}
+	</delete>
+	
+	<delete id="deletes">
+		delete from wx_menu where id in 
+        <foreach item="item" index="index" collection="array" open="(" separator="," close=")">#{item}</foreach>
+    </delete>
+	
+</mapper>
